@@ -1,0 +1,2033 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abhishek -- Graph Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07070d;
+    --surface: #10101a;
+    --border: #1a1a2e;
+    --accent: #e4ff47;
+    --accent2: #ff6b9d;
+    --accent3: #6bffd8;
+    --accent4: #b06bff;
+    --text: #eeeef8;
+    --muted: #484868;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 20px 60px;
+    overflow-x: hidden;
+  }
+
+  /* ── CIRCLE PATTERNS BACKGROUND ── */
+  .circles-bg {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  /* Rotating ring */
+  .circles-bg .ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid;
+    animation: spin linear infinite;
+  }
+
+  /* Pulsing filled circle */
+  .circles-bg .pulse {
+    position: absolute;
+    border-radius: 50%;
+    animation: pulse ease-in-out infinite alternate;
+  }
+
+  /* Dashed ring */
+  .circles-bg .dashed {
+    position: absolute;
+    border-radius: 50%;
+    border: 1.5px dashed;
+    animation: spin linear infinite reverse;
+  }
+
+  /* Dotted ring using SVG */
+  .circles-bg svg.dotted-ring {
+    position: absolute;
+    animation: spin linear infinite;
+  }
+
+  /* Grid of small dots arranged in circle */
+  .circles-bg .dot-grid {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, transparent 60%, rgba(228,255,71,0.06) 100%);
+    animation: pulse ease-in-out infinite alternate;
+  }
+
+  @keyframes spin {
+    from { transform: translate(-50%,-50%) rotate(0deg); }
+    to   { transform: translate(-50%,-50%) rotate(360deg); }
+  }
+  @keyframes pulse {
+    from { opacity: 0.3; transform: translate(-50%,-50%) scale(0.95); }
+    to   { opacity: 0.7; transform: translate(-50%,-50%) scale(1.05); }
+  }
+  @keyframes floatY {
+    from { transform: translate(-50%,-50%) translateY(-12px); }
+    to   { transform: translate(-50%,-50%) translateY(12px); }
+  }
+
+  /* ── RICH NEW ANIMATIONS ── */
+  @keyframes glitch1 {
+    0%,100% { clip-path: inset(0 0 95% 0); transform: translate(-3px,0); }
+    20%     { clip-path: inset(30% 0 50% 0); transform: translate(3px,0); }
+    40%     { clip-path: inset(60% 0 20% 0); transform: translate(-2px,0); }
+    60%     { clip-path: inset(80% 0 5% 0); transform: translate(2px,0); }
+    80%     { clip-path: inset(10% 0 80% 0); transform: translate(-1px,0); }
+  }
+  @keyframes glitch2 {
+    0%,100% { clip-path: inset(50% 0 30% 0); transform: translate(3px,0); color: var(--accent3); }
+    33%     { clip-path: inset(20% 0 60% 0); transform: translate(-3px,0); color: var(--accent2); }
+    66%     { clip-path: inset(70% 0 10% 0); transform: translate(2px,0); color: var(--accent4); }
+  }
+  @keyframes shimmer {
+    0%   { background-position: -400% center; }
+    100% { background-position: 400% center; }
+  }
+  @keyframes neonFlicker {
+    0%,89%,91%,95%,100% { opacity:1; }
+    90%  { opacity:0.3; }
+    93%  { opacity:0.6; }
+    96%  { opacity:0.2; }
+  }
+  @keyframes rainbowBorder {
+    0%   { border-color: var(--accent);  box-shadow: 0 0 14px var(--accent); }
+    25%  { border-color: var(--accent3); box-shadow: 0 0 14px var(--accent3); }
+    50%  { border-color: var(--accent4); box-shadow: 0 0 14px var(--accent4); }
+    75%  { border-color: var(--accent2); box-shadow: 0 0 14px var(--accent2); }
+    100% { border-color: var(--accent);  box-shadow: 0 0 14px var(--accent); }
+  }
+  @keyframes slideInLeft {
+    from { opacity:0; transform: translateX(-50px) skewX(5deg); }
+    to   { opacity:1; transform: translateX(0) skewX(0); }
+  }
+  @keyframes slideInRight {
+    from { opacity:0; transform: translateX(50px) skewX(-5deg); }
+    to   { opacity:1; transform: translateX(0) skewX(0); }
+  }
+  @keyframes zoomIn {
+    from { opacity:0; transform: scale(0.5) rotate(-8deg); }
+    to   { opacity:1; transform: scale(1) rotate(0deg); }
+  }
+  @keyframes flipInX {
+    from { opacity:0; transform: perspective(600px) rotateX(-90deg); }
+    to   { opacity:1; transform: perspective(600px) rotateX(0); }
+  }
+  @keyframes bounceIn {
+    0%   { opacity:0; transform: scale(0.2); }
+    55%  { opacity:1; transform: scale(1.08); }
+    75%  { transform: scale(0.93); }
+    100% { transform: scale(1); }
+  }
+  @keyframes waveFloat {
+    0%,100% { transform: translateY(0px) rotate(0deg); }
+    33%     { transform: translateY(-8px) rotate(1deg); }
+    66%     { transform: translateY(4px) rotate(-1deg); }
+  }
+  @keyframes scanline {
+    0%   { top: -4px; opacity:0; }
+    5%   { opacity:0.6; }
+    95%  { opacity:0.4; }
+    100% { top: 100%; opacity:0; }
+  }
+  @keyframes textReveal {
+    from { opacity:0; letter-spacing: 20px; filter: blur(8px); }
+    to   { opacity:1; letter-spacing: 4px; filter: blur(0); }
+  }
+  @keyframes countUp {
+    from { opacity:0; transform: translateY(14px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+  @keyframes borderDraw {
+    from { stroke-dashoffset: 1000; }
+    to   { stroke-dashoffset: 0; }
+  }
+  @keyframes ripple {
+    0%   { transform: scale(1); opacity:0.6; }
+    100% { transform: scale(2.5); opacity:0; }
+  }
+
+  /* Pattern: concentric arcs top-right */
+  .arc-r1 { width: 500px; height: 500px; top: -80px; left: calc(100% - 100px); border-color: rgba(228,255,71,0.08); animation-duration: 40s; }
+  .arc-r2 { width: 360px; height: 360px; top: -80px; left: calc(100% - 100px); border-color: rgba(107,255,216,0.07); animation-duration: 28s; }
+  .arc-r3 { width: 220px; height: 220px; top: -80px; left: calc(100% - 100px); border-color: rgba(228,255,71,0.12); animation-duration: 18s; }
+
+  /* Pattern: dashed rings bottom-left */
+  .dash-l1 { width: 600px; height: 600px; bottom: 5%; left: -150px; border-color: rgba(176,107,255,0.06); animation-duration: 55s; }
+  .dash-l2 { width: 400px; height: 400px; bottom: 5%; left: -150px; border-color: rgba(176,107,255,0.09); animation-duration: 35s; }
+  .dash-l3 { width: 200px; height: 200px; bottom: 5%; left: -150px; border-color: rgba(255,107,157,0.10); animation-duration: 22s; }
+
+  /* Floating pulse center */
+  .pulse-c1 { width: 700px; height: 700px; top: 30%; left: 50%; background: radial-gradient(circle, rgba(228,255,71,0.025) 0%, transparent 70%); animation: pulse 6s ease-in-out infinite alternate; }
+  .pulse-c2 { width: 300px; height: 300px; top: 15%; left: 20%; background: radial-gradient(circle, rgba(107,255,216,0.04) 0%, transparent 70%); animation: pulse 9s ease-in-out 2s infinite alternate; }
+
+  /* ── HEADER ── */
+  .hero {
+    width: 100%;
+    max-width: 900px;
+    padding: 52px 0 48px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .brand-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 6px;
+  }
+
+  /* The "A" circle logo with pattern */
+  .logo-circle {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+    animation: bounceIn 0.8s cubic-bezier(0.34,1.56,0.64,1) both;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s;
+  }
+  .logo-circle:hover {
+    transform: scale(1.15) rotate(10deg);
+    box-shadow: 0 0 30px rgba(228,255,71,0.5);
+  }
+
+  .logo-circle::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(0,0,0,0.08) 5px, rgba(0,0,0,0.08) 6px);
+  }
+
+  .logo-circle::after {
+    content: '';
+    position: absolute;
+    width: 200%; height: 200%;
+    top: -50%; left: -50%;
+    border: 12px solid rgba(0,0,0,0.07);
+    border-radius: 50%;
+    animation: spin 12s linear infinite;
+  }
+
+  .logo-letter {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: #07070d;
+    position: relative;
+    z-index: 2;
+  }
+
+  .brand-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 8vw, 88px);
+    letter-spacing: 4px;
+    color: var(--text);
+    line-height: 1;
+    position: relative;
+    animation: textReveal 0.9s cubic-bezier(0.16,1,0.3,1) both;
+  }
+
+  .brand-name span { color: var(--accent); animation: neonFlicker 4s ease-in-out 2s infinite; }
+
+  /* Glitch layers */
+  .brand-name::before,
+  .brand-name::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: inherit;
+    letter-spacing: inherit;
+    color: var(--text);
+    pointer-events: none;
+  }
+  .brand-name::before {
+    animation: glitch1 6s steps(1) 3s infinite;
+    color: var(--accent3);
+    z-index: -1;
+  }
+  .brand-name::after {
+    animation: glitch2 6s steps(1) 3.1s infinite;
+    z-index: -1;
+  }
+
+  .tagline {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideInLeft 0.7s 0.4s cubic-bezier(0.16,1,0.3,1) both;
+  }
+
+  .tagline::before {
+    content: '';
+    display: inline-block;
+    width: 28px; height: 1px;
+    background: var(--accent);
+  }
+
+  /* Decorative circle pattern row */
+  .pattern-strip {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 28px 0 0;
+    overflow: hidden;
+    height: 32px;
+  }
+
+  .pat-circle {
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* solid */
+  .pat-solid { background: var(--accent); }
+  /* ring */
+  .pat-ring { border: 2px solid var(--accent3); background: transparent; }
+  /* dashed */
+  .pat-dash { border: 2px dashed var(--accent4); background: transparent; }
+  /* dotted */
+  .pat-dot { border: 2px dotted var(--accent2); background: transparent; }
+  /* half */
+  .pat-half { background: linear-gradient(90deg, var(--accent) 50%, transparent 50%); border: 1px solid var(--accent); }
+  /* striped */
+  .pat-stripe {
+    background: repeating-linear-gradient(45deg, var(--accent) 0, var(--accent) 2px, transparent 2px, transparent 6px);
+    border: 1px solid var(--accent);
+  }
+  /* concentric lines */
+  .pat-concentric {
+    background:
+      radial-gradient(circle, transparent 20%, transparent 20%, transparent 22%, var(--accent3) 22%, var(--accent3) 24%, transparent 24%,
+      transparent 36%, var(--accent3) 36%, var(--accent3) 38%, transparent 38%,
+      transparent 48%, var(--accent3) 48%, var(--accent3) 50%, transparent 50%);
+    border: 1px solid var(--accent3);
+  }
+  /* crosshatch */
+  .pat-cross {
+    background:
+      linear-gradient(var(--accent4) 1px, transparent 1px),
+      linear-gradient(90deg, var(--accent4) 1px, transparent 1px);
+    background-size: 5px 5px;
+    border-radius: 50%;
+    border: 1px solid var(--accent4);
+  }
+  /* radial spokes */
+  .pat-spokes {
+    background: repeating-conic-gradient(var(--accent2) 0deg 3deg, transparent 3deg 15deg);
+    border-radius: 50%;
+    border: 1px solid var(--accent2);
+  }
+
+  /* ── CONTROLS ── */
+  .container {
+    width: 100%;
+    max-width: 900px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .input-zone {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 32px;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+    animation: flipInX 0.6s 0.2s cubic-bezier(0.16,1,0.3,1) both;
+    transition: border-color 0.4s, box-shadow 0.4s;
+  }
+  .input-zone:focus-within {
+    animation: rainbowBorder 3s linear infinite;
+  }
+
+  .input-zone::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: linear-gradient(to bottom, var(--accent), var(--accent3));
+  }
+
+  /* circle pattern corner decoration */
+  .input-zone::after {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    border: 1px solid rgba(228,255,71,0.08);
+    background:
+      radial-gradient(circle at 50% 50%, transparent 30%, transparent 30%, transparent 35%, rgba(228,255,71,0.04) 35%, rgba(228,255,71,0.04) 40%, transparent 40%,
+      transparent 55%, rgba(228,255,71,0.04) 55%, rgba(228,255,71,0.04) 60%, transparent 60%);
+  }
+
+  .row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .field { flex: 1; min-width: 140px; }
+
+  .field label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .field input, .field select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    padding: 12px 16px;
+    border-radius: 3px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .field input:focus, .field select:focus { border-color: var(--accent); }
+  .field select option { background: var(--bg); }
+
+  textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    padding: 14px 16px;
+    border-radius: 3px;
+    outline: none;
+    resize: vertical;
+    min-height: 76px;
+    transition: border-color 0.2s;
+    line-height: 1.6;
+  }
+
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--muted); }
+
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  button {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+    overflow: hidden;
+  }
+  button::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.12);
+    transform: translateX(-100%) skewX(-15deg);
+    transition: transform 0.4s ease;
+  }
+  button:hover::after { transform: translateX(200%) skewX(-15deg); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent) 0%, #b8ff00 50%, var(--accent) 100%);
+    background-size: 200% auto;
+    color: #07070d;
+    font-weight: 700;
+    animation: shimmer 3s linear infinite;
+    box-shadow: 0 0 0 0 rgba(228,255,71,0.4);
+  }
+  .btn-primary:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 8px 25px rgba(228,255,71,0.4);
+  }
+  .btn-primary:active { transform: translateY(0) scale(0.98); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .btn-ghost:hover {
+    border-color: var(--muted);
+    color: var(--text);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(255,255,255,0.05);
+  }
+
+  .btn-download {
+    background: transparent;
+    color: var(--accent3);
+    border: 1px solid var(--accent3);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .btn-download::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent3);
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+  .btn-download:hover::before { opacity: 0.12; }
+  .btn-download:hover {
+    border-color: var(--accent3);
+    color: var(--accent3);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(107,255,216,0.25);
+  }
+  .btn-download svg { position: relative; z-index: 1; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+  .btn-download:hover svg { transform: translateY(3px); }
+  .btn-download span { position: relative; z-index: 1; }
+  .btn-download.loading { opacity: 0.6; pointer-events: none; }
+
+  .btn-img-download {
+    background: transparent;
+    color: var(--accent4);
+    border: 1px solid var(--accent4);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .btn-img-download::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent4);
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+  .btn-img-download:hover::before { opacity: 0.12; }
+  .btn-img-download:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(176,107,255,0.3);
+  }
+  .btn-img-download svg { position: relative; z-index: 1; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+  .btn-img-download:hover svg { transform: scale(1.2); }
+  .btn-img-download span { position: relative; z-index: 1; }
+  .btn-img-download.loading { opacity: 0.6; pointer-events: none; }
+
+  /* Ripple effect for download buttons */
+  .btn-ripple {
+    position: absolute;
+    border-radius: 50%;
+    width: 6px; height: 6px;
+    background: rgba(255,255,255,0.5);
+    transform: scale(0);
+    animation: rippleOut 0.6s linear;
+    pointer-events: none;
+  }
+  @keyframes rippleOut {
+    to { transform: scale(40); opacity: 0; }
+  }
+
+  /* ── FOOTER ── */
+  .footer-contact {
+    width: 100%;
+    max-width: 900px;
+    margin-top: 56px;
+    padding: 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    animation: slideInLeft 0.7s 0.3s cubic-bezier(0.16,1,0.3,1) both;
+    transition: box-shadow 0.3s;
+  }
+  .footer-contact:hover { box-shadow: 0 0 40px rgba(228,255,71,0.06); }
+
+  .footer-contact::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 3px;
+    background: linear-gradient(to right, var(--accent), var(--accent3), var(--accent4));
+  }
+
+  .footer-left {}
+
+  .footer-founded {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .footer-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: var(--text);
+    letter-spacing: 3px;
+    line-height: 1;
+  }
+
+  .footer-name span { color: var(--accent); }
+
+  .footer-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+
+  .contact-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .contact-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    line-height: 1;
+  }
+
+  .contact-number a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .contact-number a:hover { color: #f0ff6a; }
+
+  /* ── FLOATING MOBILE BUTTON ── */
+  .float-call {
+    position: fixed;
+    bottom: 32px;
+    right: 28px;
+    z-index: 999;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #07070d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 24px rgba(228,255,71,0.35), 0 0 0 0 rgba(228,255,71,0.4);
+    cursor: pointer;
+    text-decoration: none;
+    animation: callPulse 2.5s ease-in-out infinite, waveFloat 3s ease-in-out infinite;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s;
+    border: none;
+  }
+
+  .float-call:hover {
+    transform: scale(1.15) translateY(-4px);
+    box-shadow: 0 10px 35px rgba(228,255,71,0.55), 0 0 0 8px rgba(228,255,71,0.1);
+    animation-play-state: paused;
+  }
+
+  .float-call svg {
+    width: 26px;
+    height: 26px;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .float-call:hover svg { transform: rotate(15deg) scale(1.1); }
+
+  @keyframes callPulse {
+    0%   { box-shadow: 0 4px 24px rgba(228,255,71,0.35), 0 0 0 0 rgba(228,255,71,0.4); }
+    60%  { box-shadow: 0 4px 24px rgba(228,255,71,0.35), 0 0 0 14px rgba(228,255,71,0); }
+    100% { box-shadow: 0 4px 24px rgba(228,255,71,0.35), 0 0 0 0 rgba(228,255,71,0); }
+  }
+  @keyframes waveFloat {
+    0%,100% { margin-bottom: 0px; }
+    50%     { margin-bottom: 8px; }
+  }
+
+  .float-call-tooltip {
+    position: fixed;
+    bottom: 100px;
+    right: 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 1px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 998;
+  }
+
+  .float-call:hover + .float-call-tooltip {
+    opacity: 1;
+  }
+
+  .error-msg {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--accent2);
+    margin-top: 12px;
+    display: none;
+  }
+  .error-msg.show { display: block; }
+
+  /* ── CHART ZONE ── */
+  .chart-zone {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 32px;
+    min-height: 340px;
+    position: relative;
+    overflow: hidden;
+    display: none;
+  }
+
+  /* Scanline effect on chart */
+  .chart-zone::before {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(to bottom, transparent, rgba(228,255,71,0.08), transparent);
+    animation: scanline 4s linear 1s infinite;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  /* circle pattern in chart corner */
+  .chart-zone::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; right: -40px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    border: 1px dashed rgba(107,255,216,0.08);
+    box-shadow: 0 0 0 30px rgba(107,255,216,0.015), 0 0 0 60px rgba(107,255,216,0.01);
+    pointer-events: none;
+  }
+
+  .chart-zone.visible { display: block; animation: zoomIn 0.5s cubic-bezier(0.34,1.2,0.64,1); }
+
+  .chart-zone.visible .chart-header { animation: slideInRight 0.4s 0.1s cubic-bezier(0.16,1,0.3,1) both; }
+  .chart-zone.visible #chartContent { animation: flipInX 0.5s 0.15s cubic-bezier(0.16,1,0.3,1) both; }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .chart-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .stats { display: flex; gap: 24px; }
+
+  .stat { text-align: right; }
+
+  .stat-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 18px;
+    color: var(--accent);
+    font-weight: 700;
+    animation: countUp 0.4s cubic-bezier(0.16,1,0.3,1) both;
+  }
+
+  .stat-lbl {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* BAR CHART */
+  .bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 220px;
+    padding-bottom: 32px;
+    position: relative;
+  }
+
+  .bar-chart::after {
+    content: '';
+    position: absolute;
+    bottom: 32px; left: 0; right: 0;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    position: relative;
+  }
+
+  .bar {
+    width: 100%;
+    border-radius: 2px 2px 0 0;
+    transition: height 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s, box-shadow 0.2s;
+    position: relative;
+    cursor: pointer;
+    min-width: 16px;
+  }
+
+  .bar:hover { filter: brightness(1.3); box-shadow: 0 -6px 20px rgba(255,255,255,0.15); transform: scaleX(1.03); }
+
+  .bar-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    white-space: nowrap;
+  }
+
+  .bar-lbl {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    position: absolute;
+    bottom: 0;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 100%;
+    text-overflow: ellipsis;
+  }
+
+  /* PIE */
+  .pie-chart-wrap { display: flex; align-items: center; gap: 40px; flex-wrap: wrap; }
+  .pie-svg { width: 200px; height: 200px; flex-shrink: 0; }
+  .pie-legend { flex: 1; min-width: 180px; }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+  }
+
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .legend-name { color: var(--muted); flex: 1; }
+  .legend-num { color: var(--text); font-weight: 700; }
+  .legend-pct { color: var(--muted); font-size: 9px; }
+
+  /* LINE */
+  .line-chart-wrap { position: relative; height: 220px; margin-bottom: 8px; }
+  .line-chart-wrap svg { width: 100%; height: 100%; overflow: visible; }
+
+  /* CIRCLE BUBBLE CHART */
+  .bubble-wrap {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    gap: 12px;
+    height: 260px;
+    padding-bottom: 36px;
+    position: relative;
+  }
+
+  .bubble-wrap::after {
+    content: '';
+    position: absolute;
+    bottom: 36px; left: 0; right: 0;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .bubble-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 1;
+    height: 100%;
+    gap: 6px;
+    position: relative;
+  }
+
+  .bubble {
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), filter 0.25s, box-shadow 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bubble:hover {
+    transform: scale(1.18) translateY(-6px);
+    filter: brightness(1.25);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+  }
+
+  .bubble-inner {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: rgba(0,0,0,0.6);
+    font-weight: 700;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .bubble-lbl {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    position: absolute;
+    bottom: 0;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /* RADAR / CIRCLE POLAR CHART label */
+  .radar-wrap { position: relative; display: flex; justify-content: center; }
+  .radar-wrap svg { overflow: visible; }
+
+  /* CIRCLE PATTERN CHART (new) */
+  .circle-pattern-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    padding: 12px 0;
+  }
+
+  .cp-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .cp-circle-outer {
+    position: relative;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.25s;
+  }
+  .cp-circle-outer:hover { transform: scale(1.08); }
+
+  .cp-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: #07070d;
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .cp-lbl {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* OPTGROUP styling */
+  optgroup {
+    background: var(--surface);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+  option {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    padding: 4px 8px;
+  }
+
+  /* SCATTER */
+  .scatter-dot { transition: r 0.3s, opacity 0.2s; cursor: pointer; }
+  .scatter-dot:hover { opacity: 1 !important; }
+
+  /* TREEMAP hover */
+  .treemap-cell { transition: opacity 0.2s, transform 0.2s; }
+
+  /* GAUGE animation */
+  .gauge-needle { transition: transform 0.9s cubic-bezier(0.34,1.56,0.64,1); }
+
+  /* WAVE */
+  .wave-path { animation: waveDrift 4s ease-in-out infinite alternate; }
+  @keyframes waveDrift {
+    from { transform: translateX(-3px); }
+    to   { transform: translateX(3px); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ANIMATED CIRCLE PATTERNS BACKGROUND -->
+<div class="circles-bg">
+  <!-- concentric rings top-right -->
+  <div class="ring arc-r1"></div>
+  <div class="ring arc-r2"></div>
+  <div class="ring arc-r3"></div>
+  <!-- dashed rings bottom-left -->
+  <div class="dashed dash-l1"></div>
+  <div class="dashed dash-l2"></div>
+  <div class="dashed dash-l3"></div>
+  <!-- pulsing glow centers -->
+  <div class="pulse pulse-c1"></div>
+  <div class="pulse pulse-c2"></div>
+
+  <!-- SVG dotted rings mid area -->
+  <svg class="dotted-ring" style="width:320px;height:320px;top:45%;left:75%;animation-duration:30s;" viewBox="0 0 320 320">
+    <circle cx="160" cy="160" r="150" fill="none" stroke="rgba(176,107,255,0.07)" stroke-width="1.5" stroke-dasharray="4 8"/>
+  </svg>
+  <svg class="dotted-ring" style="width:180px;height:180px;top:60%;left:8%;animation-duration:20s;animation-direction:reverse;" viewBox="0 0 180 180">
+    <circle cx="90" cy="90" r="80" fill="none" stroke="rgba(228,255,71,0.08)" stroke-width="1" stroke-dasharray="3 6"/>
+  </svg>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="brand-row">
+    <div class="logo-circle">
+      <span class="logo-letter">A</span>
+    </div>
+    <div class="brand-name" data-text="ABHISHEK">ABHI<span>SHEK</span></div>
+  </div>
+  <div class="tagline">Graph Studio -- Numbers into Visual Stories</div>
+
+  <!-- Pattern strip: different circle types -->
+  <div class="pattern-strip">
+    <div class="pat-circle pat-solid" style="width:18px;height:18px;"></div>
+    <div class="pat-circle pat-ring" style="width:22px;height:22px;"></div>
+    <div class="pat-circle pat-dash" style="width:18px;height:18px;"></div>
+    <div class="pat-circle pat-dot" style="width:22px;height:22px;"></div>
+    <div class="pat-circle pat-half" style="width:18px;height:18px;"></div>
+    <div class="pat-circle pat-stripe" style="width:22px;height:22px;"></div>
+    <div class="pat-circle pat-concentric" style="width:28px;height:28px;"></div>
+    <div class="pat-circle pat-cross" style="width:22px;height:22px;"></div>
+    <div class="pat-circle pat-spokes" style="width:26px;height:26px;"></div>
+    <div style="width:1px;height:20px;background:var(--border);margin:0 4px;"></div>
+    <!-- repeating smaller -->
+    <div class="pat-circle pat-solid" style="width:10px;height:10px;opacity:0.5"></div>
+    <div class="pat-circle pat-ring" style="width:12px;height:12px;opacity:0.5"></div>
+    <div class="pat-circle pat-dash" style="width:10px;height:10px;opacity:0.5"></div>
+    <div class="pat-circle pat-dot" style="width:12px;height:12px;opacity:0.5"></div>
+    <div class="pat-circle pat-concentric" style="width:14px;height:14px;opacity:0.5"></div>
+    <div class="pat-circle pat-spokes" style="width:14px;height:14px;opacity:0.5"></div>
+  </div>
+</div>
+
+<!-- CONTROLS -->
+<div class="container">
+  <div class="input-zone">
+    <div class="row">
+      <div class="field" style="flex:2;min-width:260px;">
+        <label>Numbers (comma or space separated)</label>
+        <textarea id="numInput" placeholder="e.g. 12, 45, 7, 89, 34, 56">42, 78, 55, 90, 31, 67, 48, 82</textarea>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Labels (optional)</label>
+        <input type="text" id="labelInput" placeholder="Jan, Feb, Mar...">
+      </div>
+      <div class="field">
+        <label>Chart Type</label>
+        <select id="chartType">
+          <optgroup label="── Circle Family">
+            <option value="bubble">● Circle Bubbles</option>
+            <option value="cpat">◎ Circle Patterns</option>
+            <option value="radar">◉ Radar / Polar</option>
+          </optgroup>
+          <optgroup label="── Bar Family">
+            <option value="bar">▮ Bar Chart</option>
+            <option value="hbar">▬ Horizontal Bar</option>
+            <option value="stacked">▦ Stacked Bar</option>
+            <option value="funnel">▽ Funnel Chart</option>
+          </optgroup>
+          <optgroup label="── Line Family">
+            <option value="line">╱ Line Chart</option>
+            <option value="area">◭ Area Chart</option>
+            <option value="wave">〜 Wave Chart</option>
+          </optgroup>
+          <optgroup label="── Other">
+            <option value="pie">◑ Pie / Donut</option>
+            <option value="scatter">⁘ Scatter Plot</option>
+            <option value="treemap">▦ Treemap</option>
+            <option value="gauge">◌ Gauge Meter</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="field">
+        <label>Color Theme (28)</label>
+        <select id="colorTheme">
+          <optgroup label="⚡ Neon">
+            <option value="lime">🟡 Lime Neon</option>
+            <option value="cyan">🩵 Cyan Pulse</option>
+            <option value="toxic">☢️ Toxic Green</option>
+            <option value="matrix">💻 Matrix</option>
+            <option value="electric">⚡ Electric Mix</option>
+            <option value="neonpop">🌀 Neon Rainbow</option>
+          </optgroup>
+          <optgroup label="🔥 Gradient">
+            <option value="fire">🔥 Fire</option>
+            <option value="sunset">🌅 Sunset</option>
+            <option value="aurora">🌌 Aurora</option>
+            <option value="ocean">🌊 Ocean Deep</option>
+            <option value="lava">🌋 Lava Flow</option>
+            <option value="deepspace">🌑 Deep Space</option>
+            <option value="tropical">🌴 Tropical</option>
+            <option value="magma">🔴 Magma Core</option>
+          </optgroup>
+          <optgroup label="🍬 Pastel / Pop">
+            <option value="multi">🌈 Multicolor</option>
+            <option value="candy">🍬 Candy Pop</option>
+            <option value="rose">🌸 Rose Gold</option>
+            <option value="violet">💜 Violet Dream</option>
+            <option value="ice">🧊 Arctic Ice</option>
+            <option value="pastelbow">🎀 Pastel Rainbow</option>
+            <option value="bubblegum">🫧 Bubblegum</option>
+          </optgroup>
+          <optgroup label="🌑 Dark / Moody">
+            <option value="midnight">🌙 Midnight Blue</option>
+            <option value="obsidian">🪨 Obsidian</option>
+            <option value="bloodmoon">🩸 Blood Moon</option>
+            <option value="forest">🌲 Dark Forest</option>
+          </optgroup>
+          <optgroup label="✨ Metallic">
+            <option value="gold">🥇 Gold Rush</option>
+            <option value="silver">🥈 Silver Chrome</option>
+            <option value="copper">🟤 Copper</option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="render()">GENERATE GRAPH</button>
+      <button class="btn-ghost" onclick="randomize()">RANDOMIZE</button>
+      <button class="btn-ghost" onclick="clearAll()">CLEAR</button>
+      <button class="btn-download" id="downloadBtn" onclick="downloadPDF(event)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>DOWNLOAD PDF</span>
+      </button>
+      <button class="btn-img-download" id="imgDownloadBtn" onclick="downloadImage(event)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>DOWNLOAD IMAGE</span>
+      </button>
+    </div>
+    <div class="error-msg" id="errMsg">⚠ Please enter valid numbers.</div>
+  </div>
+
+  <div class="chart-zone" id="chartZone">
+    <div class="chart-header">
+      <span class="chart-title" id="chartLabel">CIRCLE BUBBLES -- 8 VALUES</span>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-val" id="statMax">--</div>
+          <div class="stat-lbl">MAX</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val" id="statMin">--</div>
+          <div class="stat-lbl">MIN</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val" id="statAvg">--</div>
+          <div class="stat-lbl">AVG</div>
+        </div>
+      </div>
+    </div>
+    <div id="chartContent"></div>
+  </div>
+</div>
+
+<script>
+const THEMES = {
+  // ── NEON
+  lime:       (i,n) => `hsl(${75-i*3},100%,${52+i}%)`,
+  cyan:       (i,n) => `hsl(${175+i*5},90%,${55-i}%)`,
+  toxic:      (i,n) => `hsl(${88+i*12},100%,${50+i*2}%)`,
+  matrix:     (i,n) => `hsl(${120+i*5},${85+i*2}%,${42+i*3}%)`,
+  electric:   (i,n) => ['#00f5ff','#7b2fff','#ff006e','#fb5607','#ffbe0b','#3a86ff','#8338ec','#ff006e'][(i%8)],
+  neonpop:    (i,n) => `hsl(${(i/Math.max(n-1,1))*300+60},100%,${58+i*1.5}%)`,
+  // ── GRADIENT
+  fire:       (i,n) => `hsl(${30-i*(25/Math.max(n-1,1))},95%,${60-i*2}%)`,
+  sunset:     (i,n) => `hsl(${350-i*(60/Math.max(n-1,1))},92%,${62-i*2}%)`,
+  aurora:     (i,n) => `hsl(${140+i*(200/Math.max(n-1,1))},90%,${58-i*1.5}%)`,
+  ocean:      (i,n) => `hsl(${190+i*(30/Math.max(n-1,1))},88%,${48+i*2}%)`,
+  lava:       (i,n) => ['#ff4500','#ff6d00','#ffba08','#f72585','#b5179e','#7209b7','#3a0ca3','#480ca8'][(i%8)],
+  deepspace:  (i,n) => `hsl(${240+i*14},${70+i*3}%,${45+i*3}%)`,
+  tropical:   (i,n) => ['#ff6b6b','#feca57','#48dbfb','#ff9ff3','#54a0ff','#5f27cd','#00d2d3','#1dd1a1'][(i%8)],
+  magma:      (i,n) => `hsl(${i*(30/Math.max(n-1,1))},${95-i*2}%,${35+i*4}%)`,
+  // ── PASTEL / POP
+  multi:      (i,n) => `hsl(${(i/n)*360},85%,62%)`,
+  candy:      (i,n) => ['#ff6b9d','#ff9f43','#ffd32a','#0be881','#00d2d3','#54a0ff','#5f27cd','#ff6b6b'][(i%8)],
+  rose:       (i,n) => `hsl(${320+i*15},85%,${60+i}%)`,
+  violet:     (i,n) => `hsl(${270+i*8},80%,${60+i}%)`,
+  ice:        (i,n) => `hsl(${200+i*8},80%,${70+i}%)`,
+  pastelbow:  (i,n) => `hsl(${(i/n)*360},65%,78%)`,
+  bubblegum:  (i,n) => ['#fd79a8','#fdcb6e','#6c5ce7','#00cec9','#e17055','#74b9ff','#a29bfe','#55efc4'][(i%8)],
+  // ── DARK / MOODY
+  midnight:   (i,n) => `hsl(${220+i*10},${60+i*4}%,${35+i*4}%)`,
+  obsidian:   (i,n) => ['#2d3436','#636e72','#b2bec3','#dfe6e9','#74b9ff','#0984e3','#6c5ce7','#a29bfe'][(i%8)],
+  bloodmoon:  (i,n) => `hsl(${355-i*8},${85+i*2}%,${42+i*3}%)`,
+  forest:     (i,n) => `hsl(${100+i*10},${65+i*3}%,${35+i*4}%)`,
+  // ── METALLIC
+  gold:       (i,n) => `hsl(${42+i*4},${88-i*3}%,${52+i*2}%)`,
+  silver:     (i,n) => `hsl(${210+i*5},${15+i*4}%,${55+i*3}%)`,
+  copper:     (i,n) => `hsl(${18+i*8},${75-i*2}%,${50+i*2}%)`,
+};
+
+function parseInput() {
+  const raw = document.getElementById('numInput').value;
+  const nums = raw.split(/[\s,;]+/).map(s=>s.trim()).filter(Boolean).map(Number);
+  if (nums.some(isNaN) || nums.length === 0) return null;
+  return nums;
+}
+
+function getLabels(nums) {
+  const raw = document.getElementById('labelInput').value;
+  if (!raw.trim()) return nums.map((_,i)=>`#${i+1}`);
+  const lbls = raw.split(/[\s,;]+/).map(s=>s.trim()).filter(Boolean);
+  return nums.map((_,i)=>lbls[i]||`#${i+1}`);
+}
+
+function getColor(i, n) {
+  return THEMES[document.getElementById('colorTheme').value](i, n);
+}
+
+function render() {
+  const nums = parseInput();
+  const err = document.getElementById('errMsg');
+  if (!nums) { err.classList.add('show'); return; }
+  err.classList.remove('show');
+
+  const labels = getLabels(nums);
+  const type = document.getElementById('chartType').value;
+  const zone = document.getElementById('chartZone');
+  const content = document.getElementById('chartContent');
+
+  const max = Math.max(...nums), min = Math.min(...nums);
+  const avg = (nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(1);
+  document.getElementById('statMax').textContent = max;
+  document.getElementById('statMin').textContent = min;
+  document.getElementById('statAvg').textContent = avg;
+
+  const typeNames = {
+    bubble:'CIRCLE BUBBLES', cpat:'CIRCLE PATTERNS', radar:'RADAR POLAR',
+    bar:'BAR', line:'LINE', pie:'PIE/DONUT', hbar:'H-BAR',
+    area:'AREA CHART', scatter:'SCATTER PLOT', treemap:'TREEMAP',
+    funnel:'FUNNEL', gauge:'GAUGE METER', stacked:'STACKED BAR', wave:'WAVE CHART'
+  };
+  document.getElementById('chartLabel').textContent = `${typeNames[type]||type.toUpperCase()} -- ${nums.length} VALUES`;
+
+  zone.classList.remove('visible');
+  void zone.offsetWidth;
+  zone.classList.add('visible');
+
+  if      (type === 'bubble')  content.innerHTML = renderBubble(nums, labels);
+  else if (type === 'cpat')    content.innerHTML = renderCirclePattern(nums, labels);
+  else if (type === 'radar')   content.innerHTML = renderRadar(nums, labels);
+  else if (type === 'bar')     content.innerHTML = renderBar(nums, labels);
+  else if (type === 'line')    content.innerHTML = renderLine(nums, labels);
+  else if (type === 'pie')     content.innerHTML = renderPie(nums, labels);
+  else if (type === 'hbar')    content.innerHTML = renderHBar(nums, labels);
+  else if (type === 'area')    content.innerHTML = renderArea(nums, labels);
+  else if (type === 'scatter') content.innerHTML = renderScatter(nums, labels);
+  else if (type === 'treemap') content.innerHTML = renderTreemap(nums, labels);
+  else if (type === 'funnel')  content.innerHTML = renderFunnel(nums, labels);
+  else if (type === 'gauge')   content.innerHTML = renderGauge(nums, labels);
+  else if (type === 'stacked') content.innerHTML = renderStacked(nums, labels);
+  else if (type === 'wave')    content.innerHTML = renderWave(nums, labels);
+
+  if (type === 'bar' || type === 'stacked') {
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.bar').forEach((b,i) => {
+        const h = b.dataset.h; b.style.height='0px';
+        setTimeout(()=>{ b.style.height=h+'px'; }, i*60);
+      });
+    });
+  }
+  if (type === 'bubble') {
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.bubble').forEach((b,i) => {
+        b.style.transform='scale(0)';
+        setTimeout(()=>{ b.style.transform='scale(1)'; }, i*80);
+      });
+    });
+  }
+  if (type === 'hbar' || type === 'funnel') {
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.hbar-fill').forEach((b,i) => {
+        const w = b.dataset.w; b.style.width='0%';
+        setTimeout(()=>{ b.style.width=w+'%'; }, i*80);
+      });
+    });
+  }
+  if (type === 'gauge') {
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.gauge-needle').forEach(n => {
+        const rot = n.dataset.rot; n.style.transform='rotate(-90deg)';
+        setTimeout(()=>{ n.style.transform=`rotate(${rot}deg)`; }, 200);
+      });
+    });
+  }
+}
+
+/* ── CIRCLE BUBBLE CHART ── */
+function renderBubble(nums, labels) {
+  const max = Math.max(...nums);
+  const maxR = 70, minR = 16;
+  let html = '<div class="bubble-wrap">';
+  nums.forEach((v, i) => {
+    const r = minR + ((v/max) * (maxR - minR));
+    const color = getColor(i, nums.length);
+    const fontSize = r < 28 ? 8 : r < 40 ? 10 : 12;
+    html += `<div class="bubble-col">
+      <div class="bubble" style="width:${r*2}px;height:${r*2}px;background:${color};transform:scale(0);transition:transform 0.5s cubic-bezier(0.34,1.56,0.64,1);">
+        <div class="bubble-inner" style="font-size:${fontSize}px">${v}</div>
+      </div>
+      <div class="bubble-lbl">${labels[i]}</div>
+    </div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+/* ── CIRCLE PATTERN CHART ── */
+function renderCirclePattern(nums, labels) {
+  const max = Math.max(...nums);
+  const patterns = ['solid','ring','dash','dot','half','stripe','concentric','cross','spokes'];
+  let html = '<div class="circle-pattern-wrap">';
+  nums.forEach((v, i) => {
+    const size = 36 + Math.round((v/max) * 80);
+    const color = getColor(i, nums.length);
+    const pat = patterns[i % patterns.length];
+    let bgStyle = '';
+    let borderStyle = '';
+    switch(pat) {
+      case 'solid':
+        bgStyle = `background:${color};`;
+        break;
+      case 'ring':
+        bgStyle = `background:transparent;`;
+        borderStyle = `border:3px solid ${color};`;
+        break;
+      case 'dash':
+        bgStyle = `background:transparent;`;
+        borderStyle = `border:3px dashed ${color};`;
+        break;
+      case 'dot':
+        bgStyle = `background:transparent;`;
+        borderStyle = `border:3px dotted ${color};`;
+        break;
+      case 'half':
+        bgStyle = `background:linear-gradient(135deg,${color} 50%,transparent 50%);`;
+        borderStyle = `border:2px solid ${color};`;
+        break;
+      case 'stripe':
+        bgStyle = `background:repeating-linear-gradient(45deg,${color} 0,${color} 3px,transparent 3px,transparent 9px);`;
+        borderStyle = `border:2px solid ${color};`;
+        break;
+      case 'concentric':
+        bgStyle = `background:radial-gradient(circle,${color} 15%,transparent 15%,transparent 30%,${color} 30%,${color} 45%,transparent 45%,transparent 60%,${color} 60%,${color} 75%,transparent 75%);`;
+        break;
+      case 'cross':
+        bgStyle = `background:linear-gradient(${color} 2px,transparent 2px),linear-gradient(90deg,${color} 2px,transparent 2px);background-size:8px 8px;`;
+        borderStyle = `border:2px solid ${color};`;
+        break;
+      case 'spokes':
+        bgStyle = `background:repeating-conic-gradient(${color} 0deg 4deg,transparent 4deg 18deg);`;
+        borderStyle = `border:2px solid ${color};`;
+        break;
+    }
+    const textColor = (pat==='solid'||pat==='concentric'||pat==='stripe'||pat==='cross'||pat==='spokes') ? '#07070d' : color;
+    html += `<div class="cp-item">
+      <div class="cp-circle-outer" style="width:${size}px;height:${size}px;${bgStyle}${borderStyle}border-radius:50%">
+        <div class="cp-val" style="font-size:${size<50?9:size<70?11:13}px;color:${textColor}">${v}</div>
+      </div>
+      <div class="cp-lbl">${labels[i]}</div>
+    </div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+/* ── RADAR / POLAR CHART ── */
+function renderRadar(nums, labels) {
+  const n = nums.length;
+  const max = Math.max(...nums);
+  const cx = 200, cy = 200, R = 160;
+  const levels = 5;
+  let svg = `<div class="radar-wrap"><svg viewBox="0 0 400 400" style="width:min(400px,100%);height:min(400px,100%);">`;
+
+  // Grid circles + labels
+  for (let l = 1; l <= levels; l++) {
+    const r = (l/levels)*R;
+    const val = Math.round((l/levels)*max);
+    svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--border)" stroke-width="1"/>`;
+    svg += `<text x="${cx+4}" y="${cy-r+4}" fill="var(--muted)" font-size="8" font-family="Space Mono">${val}</text>`;
+  }
+
+  // Spokes
+  for (let i = 0; i < n; i++) {
+    const angle = (i/n)*2*Math.PI - Math.PI/2;
+    const x = cx + R * Math.cos(angle);
+    const y = cy + R * Math.sin(angle);
+    svg += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--border)" stroke-width="1"/>`;
+    // label
+    const lx = cx + (R+22)*Math.cos(angle);
+    const ly = cy + (R+22)*Math.sin(angle);
+    svg += `<text x="${lx}" y="${ly}" fill="var(--muted)" font-size="9" font-family="Space Mono" text-anchor="middle" dominant-baseline="middle">${labels[i]}</text>`;
+  }
+
+  // Data polygon
+  const pts = nums.map((v,i) => {
+    const angle = (i/n)*2*Math.PI - Math.PI/2;
+    const r = (v/max)*R;
+    return [cx + r*Math.cos(angle), cy + r*Math.sin(angle)];
+  });
+  const poly = pts.map(p=>p.join(',')).join(' ');
+  const color = getColor(0,1);
+  const gradId = 'rg'+Date.now();
+
+  svg += `<defs><radialGradient id="${gradId}"><stop offset="0%" stop-color="${color}" stop-opacity="0.35"/><stop offset="100%" stop-color="${color}" stop-opacity="0.05"/></radialGradient></defs>`;
+  svg += `<polygon points="${poly}" fill="url(#${gradId})" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>`;
+
+  // Dots
+  pts.forEach((p,i) => {
+    const c2 = getColor(i, n);
+    svg += `<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="${c2}" stroke="var(--bg)" stroke-width="2"><title>${labels[i]}: ${nums[i]}</title></circle>`;
+  });
+
+  svg += `</svg></div>`;
+  return svg;
+}
+
+/* ── BAR CHART ── */
+function renderBar(nums, labels) {
+  const max = Math.max(...nums);
+  const chartH = 180;
+  let html = '<div class="bar-chart">';
+  nums.forEach((v,i) => {
+    const h = Math.max(4,(v/max)*chartH);
+    const color = getColor(i, nums.length);
+    html += `<div class="bar-wrap">
+      <div class="bar-val">${v}</div>
+      <div class="bar" data-h="${h}" style="height:0px;background:${color}"></div>
+      <div class="bar-lbl">${labels[i]}</div>
+    </div>`;
+  });
+  return html + '</div>';
+}
+
+/* ── HORIZONTAL BAR ── */
+function renderHBar(nums, labels) {
+  const max = Math.max(...nums);
+  let html = '<div style="display:flex;flex-direction:column;gap:12px;padding-right:60px;">';
+  nums.forEach((v,i) => {
+    const w = Math.max(2,(v/max)*100);
+    const color = getColor(i, nums.length);
+    html += `<div style="display:flex;align-items:center;gap:12px;">
+      <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:32px;text-align:right;flex-shrink:0;">${labels[i]}</div>
+      <div style="flex:1;background:var(--bg);border-radius:2px;height:22px;position:relative;overflow:hidden;">
+        <div style="position:absolute;left:0;top:0;height:100%;width:${w}%;background:${color};border-radius:2px;transition:width 0.7s cubic-bezier(0.34,1.56,0.64,1);"></div>
+      </div>
+      <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text);width:44px;">${v}</div>
+    </div>`;
+  });
+  return html + '</div>';
+}
+
+/* ── LINE CHART ── */
+function renderLine(nums, labels) {
+  const max = Math.max(...nums), min = Math.min(...nums);
+  const pad = 40, W = 800, H = 200;
+  const xs = nums.map((_,i) => pad + (i/(Math.max(nums.length-1,1)))*(W-pad*2));
+  const ys = nums.map(v => H-pad/2-((v-min)/(max-min||1))*(H-pad));
+  const polyline = xs.map((x,i)=>`${x},${ys[i]}`).join(' ');
+  const fillPath = `M${xs[0]},${H} `+xs.map((x,i)=>`L${x},${ys[i]}`).join(' ')+` L${xs[xs.length-1]},${H} Z`;
+  const color = getColor(0,1);
+  const gradId = 'lg'+Date.now();
+
+  let svg = `<div class="line-chart-wrap"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    <defs><linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${color}" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+    </linearGradient></defs>`;
+
+  for (let g=0;g<=4;g++) {
+    const gy=(H-pad/2)-(g/4)*(H-pad);
+    const val=(min+(g/4)*(max-min)).toFixed(0);
+    svg+=`<line x1="${pad}" y1="${gy}" x2="${W-pad/2}" y2="${gy}" stroke="var(--border)" stroke-width="1"/>
+    <text x="${pad-4}" y="${gy}" fill="var(--muted)" font-size="11" font-family="Space Mono" text-anchor="end" dominant-baseline="middle">${val}</text>`;
+  }
+
+  svg+=`<path d="${fillPath}" fill="url(#${gradId})"/>
+  <polyline points="${polyline}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+
+  xs.forEach((x,i)=>{
+    svg+=`<circle cx="${x}" cy="${ys[i]}" r="5" fill="var(--bg)" stroke="${color}" stroke-width="2.5"><title>${labels[i]}: ${nums[i]}</title></circle>`;
+  });
+
+  const step=Math.ceil(nums.length/10);
+  xs.forEach((x,i)=>{
+    if(i%step===0||i===nums.length-1)
+      svg+=`<text x="${x}" y="${H-4}" fill="var(--muted)" font-size="10" font-family="Space Mono" text-anchor="middle">${labels[i]}</text>`;
+  });
+
+  return svg+'</svg></div>';
+}
+
+/* ── PIE / DONUT ── */
+function renderPie(nums, labels) {
+  const total = nums.reduce((a,b)=>a+b,0);
+  const cx=100,cy=100,r=80,ir=48;
+  let html = '<div class="pie-chart-wrap"><svg class="pie-svg" viewBox="0 0 200 200">';
+
+  let startAngle = -Math.PI/2;
+  nums.forEach((v,i) => {
+    const angle=(v/total)*2*Math.PI;
+    const endAngle=startAngle+angle;
+    const x1=cx+r*Math.cos(startAngle),y1=cy+r*Math.sin(startAngle);
+    const x2=cx+r*Math.cos(endAngle),y2=cy+r*Math.sin(endAngle);
+    const xi1=cx+ir*Math.cos(startAngle),yi1=cy+ir*Math.sin(startAngle);
+    const xi2=cx+ir*Math.cos(endAngle),yi2=cy+ir*Math.sin(endAngle);
+    const large=angle>Math.PI?1:0;
+    const color=getColor(i,nums.length);
+    const path=`M${xi1},${yi1} L${x1},${y1} A${r},${r} 0 ${large} 1 ${x2},${y2} L${xi2},${yi2} A${ir},${ir} 0 ${large} 0 ${xi1},${yi1} Z`;
+    html+=`<path d="${path}" fill="${color}" stroke="var(--bg)" stroke-width="2" style="cursor:pointer;transition:opacity 0.2s" onmouseenter="this.style.opacity=0.8" onmouseleave="this.style.opacity=1"><title>${labels[i]}: ${v} (${((v/total)*100).toFixed(1)}%)</title></path>`;
+    startAngle=endAngle;
+  });
+
+  html+=`<text x="100" y="96" text-anchor="middle" fill="var(--text)" font-family="Syne" font-size="22" font-weight="800">${total}</text>
+  <text x="100" y="112" text-anchor="middle" fill="var(--muted)" font-family="Space Mono" font-size="9" letter-spacing="1">TOTAL</text>
+  </svg><div class="pie-legend">`;
+
+  nums.forEach((v,i)=>{
+    const color=getColor(i,nums.length);
+    html+=`<div class="legend-item">
+      <div class="legend-dot" style="background:${color}"></div>
+      <span class="legend-name">${labels[i]}</span>
+      <span class="legend-num">${v}</span>
+      <span class="legend-pct">&nbsp;${((v/total)*100).toFixed(1)}%</span>
+    </div>`;
+  });
+
+  return html+'</div></div>';
+}
+
+/* ── AREA CHART ── */
+function renderArea(nums, labels) {
+  const max = Math.max(...nums), min = Math.min(...nums);
+  const pad = 44, W = 820, H = 220;
+  const xs = nums.map((_,i) => pad + (i/(Math.max(nums.length-1,1)))*(W-pad*2));
+  const ys = nums.map(v => H-pad/2-((v-min)/(max-min||1))*(H-pad));
+  const n = nums.length;
+  // Smooth bezier
+  let d = `M${xs[0]},${ys[0]}`;
+  for (let i=1;i<n;i++) {
+    const cx1=(xs[i-1]+xs[i])/2, cx2=(xs[i-1]+xs[i])/2;
+    d+=` C${cx1},${ys[i-1]} ${cx2},${ys[i]} ${xs[i]},${ys[i]}`;
+  }
+  const fillD = d + ` L${xs[n-1]},${H-pad/2} L${xs[0]},${H-pad/2} Z`;
+  const id1='ag'+Date.now(), id2='ag2'+(Date.now()+1);
+  const c1=getColor(0,1), c2=getColor(Math.floor(n/2),n);
+
+  let svg=`<div class="line-chart-wrap" style="height:260px"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="${id1}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${c1}" stop-opacity="0.5"/>
+      <stop offset="60%" stop-color="${c2}" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="${c2}" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="${id2}" x1="0" y1="0" x2="1" y2="0">
+      ${nums.map((_,i)=>`<stop offset="${(i/(n-1)*100).toFixed(1)}%" stop-color="${getColor(i,n)}"/>`).join('')}
+    </linearGradient>
+  </defs>`;
+
+  for(let g=0;g<=4;g++){
+    const gy=(H-pad/2)-(g/4)*(H-pad);
+    const val=(min+(g/4)*(max-min)).toFixed(0);
+    svg+=`<line x1="${pad}" y1="${gy}" x2="${W-pad/2}" y2="${gy}" stroke="var(--border)" stroke-width="1"/>
+    <text x="${pad-6}" y="${gy}" fill="var(--muted)" font-size="10" font-family="Space Mono" text-anchor="end" dominant-baseline="middle">${val}</text>`;
+  }
+  svg+=`<path d="${fillD}" fill="url(#${id1})"/>`;
+  svg+=`<path d="${d}" fill="none" stroke="url(#${id2})" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+  xs.forEach((x,i)=>{
+    const c=getColor(i,n);
+    svg+=`<circle cx="${x}" cy="${ys[i]}" r="5" fill="${c}" stroke="var(--bg)" stroke-width="2.5"><title>${labels[i]}: ${nums[i]}</title></circle>`;
+    const step=Math.ceil(n/10);
+    if(i%step===0||i===n-1) svg+=`<text x="${x}" y="${H-4}" fill="var(--muted)" font-size="10" font-family="Space Mono" text-anchor="middle">${labels[i]}</text>`;
+  });
+  return svg+'</svg></div>';
+}
+
+/* ── SCATTER PLOT ── */
+function renderScatter(nums, labels) {
+  const max=Math.max(...nums), min=Math.min(...nums);
+  const W=820,H=280,pad=50;
+  const id='sc'+Date.now();
+  let svg=`<div class="line-chart-wrap" style="height:280px"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+  <defs><radialGradient id="${id}"><stop offset="0%" stop-color="rgba(228,255,71,0.1)"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs>`;
+
+  for(let g=0;g<=4;g++){
+    const gy=H-pad-(g/4)*(H-pad*2);
+    const gx=pad+(g/4)*(W-pad*2);
+    svg+=`<line x1="${pad}" y1="${gy}" x2="${W-pad/2}" y2="${gy}" stroke="var(--border)" stroke-width="1"/>`;
+    svg+=`<line x1="${gx}" y1="${pad}" x2="${gx}" y2="${H-pad}" stroke="var(--border)" stroke-width="1" opacity="0.5"/>`;
+  }
+
+  // Plot each value as (index, value) scatter
+  nums.forEach((v,i)=>{
+    const x = pad + (i/(Math.max(nums.length-1,1)))*(W-pad*2);
+    const y = H-pad-((v-min)/(max-min||1))*(H-pad*2);
+    const r = 6 + ((v/max)*12);
+    const color=getColor(i,nums.length);
+    svg+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${color}" fill-opacity="0.7" stroke="${color}" stroke-width="1.5">
+      <title>${labels[i]}: ${v}</title>
+      <animate attributeName="r" from="0" to="${r}" dur="0.4s" begin="${i*0.05}s" fill="freeze"/>
+    </circle>`;
+    svg+=`<text x="${x}" y="${y-r-3}" fill="var(--muted)" font-size="9" font-family="Space Mono" text-anchor="middle">${labels[i]}</text>`;
+  });
+
+  svg+=`<text x="${W/2}" y="${H-4}" fill="var(--muted)" font-size="9" font-family="Space Mono" text-anchor="middle" letter-spacing="2">INDEX →</text>`;
+  svg+=`<text x="12" y="${H/2}" fill="var(--muted)" font-size="9" font-family="Space Mono" text-anchor="middle" transform="rotate(-90,12,${H/2})" letter-spacing="2">VALUE</text>`;
+  return svg+'</svg></div>';
+}
+
+/* ── TREEMAP ── */
+function renderTreemap(nums, labels) {
+  const total=nums.reduce((a,b)=>a+b,0);
+  const W=820,H=280;
+  let html=`<div style="width:100%;aspect-ratio:820/280;max-height:280px;position:relative;border-radius:4px;overflow:hidden;display:flex;flex-wrap:wrap;gap:2px;background:var(--bg);">`;
+  nums.forEach((v,i)=>{
+    const pct=(v/total*100).toFixed(2);
+    const color=getColor(i,nums.length);
+    const brightness=v/Math.max(...nums);
+    html+=`<div style="
+      flex:${v} 1 0%;min-width:${Math.max(v/total*100,4)}%;
+      background:${color};opacity:${0.65+brightness*0.35};
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      cursor:pointer;position:relative;overflow:hidden;
+      transition:opacity 0.2s,transform 0.2s;border-radius:2px;
+      min-height:60px;" 
+      onmouseenter="this.style.opacity='1';this.style.transform='scale(1.02)';this.style.zIndex='2'"
+      onmouseleave="this.style.opacity='${0.65+brightness*0.35}';this.style.transform='scale(1)';this.style.zIndex='1'"
+      title="${labels[i]}: ${v} (${pct}%)">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(10px,${Math.sqrt(v/total)*60}px,28px);color:#07070d;font-weight:900;line-height:1">${v}</div>
+      <div style="font-family:'Space Mono',monospace;font-size:clamp(7px,${Math.sqrt(v/total)*16}px,11px);color:rgba(0,0,0,0.6);margin-top:2px">${labels[i]}</div>
+      <div style="font-family:'Space Mono',monospace;font-size:clamp(6px,${Math.sqrt(v/total)*13}px,9px);color:rgba(0,0,0,0.45)">${pct}%</div>
+    </div>`;
+  });
+  return html+'</div>';
+}
+
+/* ── FUNNEL CHART ── */
+function renderFunnel(nums, labels) {
+  const max=Math.max(...nums);
+  let html=`<div style="display:flex;flex-direction:column;gap:4px;align-items:center;padding:8px 0;">`;
+  nums.forEach((v,i)=>{
+    const w=Math.max(20,(v/max)*96);
+    const color=getColor(i,nums.length);
+    html+=`<div style="display:flex;align-items:center;gap:12px;width:100%;">
+      <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:40px;text-align:right;flex-shrink:0">${labels[i]}</div>
+      <div style="flex:1;display:flex;justify-content:center;">
+        <div class="hbar-fill" data-w="${w}" style="
+          width:0%;max-width:${w}%;height:32px;
+          background:linear-gradient(90deg,${color}cc,${color});
+          border-radius:2px;display:flex;align-items:center;justify-content:center;
+          font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:#07070d;
+          transition:width 0.7s cubic-bezier(0.34,1.56,0.64,1);
+          clip-path:polygon(0 0,100% 5%,100% 95%,0 100%);
+          position:relative;overflow:hidden;cursor:pointer;
+        " onmouseenter="this.style.filter='brightness(1.3)'" onmouseleave="this.style.filter=''">${v}</div>
+      </div>
+      <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:44px">${((v/max)*100).toFixed(0)}%</div>
+    </div>`;
+  });
+  return html+'</div>';
+}
+
+/* ── GAUGE METER ── */
+function renderGauge(nums, labels) {
+  const max=Math.max(...nums);
+  let html=`<div style="display:flex;flex-wrap:wrap;gap:20px;justify-content:center;padding:8px 0;">`;
+  nums.forEach((v,i)=>{
+    const color=getColor(i,nums.length);
+    const pct=v/max;
+    const startAngle=-Math.PI; const endAngle=0;
+    const angle=startAngle+(pct*(endAngle-startAngle));
+    const cx=80,cy=80,r=60,ir=40;
+    // Arc path for filled portion
+    const sx=cx+r*Math.cos(startAngle), sy=cy+r*Math.sin(startAngle);
+    const ex=cx+r*Math.cos(angle), ey=cy+r*Math.sin(angle);
+    const six=cx+ir*Math.cos(startAngle), siy=cy+ir*Math.sin(startAngle);
+    const eix=cx+ir*Math.cos(angle), eiy=cy+ir*Math.sin(angle);
+    const large=pct>0.5?1:0;
+    const arcPath=`M${six},${siy} L${sx},${sy} A${r},${r} 0 ${large} 1 ${ex},${ey} L${eix},${eiy} A${ir},${ir} 0 ${large} 0 ${six},${siy} Z`;
+    // Track arc
+    const tex=cx+r*Math.cos(0), tey=cy+r*Math.sin(0);
+    const tiex=cx+ir*Math.cos(0), tiey=cy+ir*Math.sin(0);
+    const trackPath=`M${six},${siy} L${sx},${sy} A${r},${r} 0 1 1 ${tex},${tey} L${tiex},${tiey} A${ir},${ir} 0 1 0 ${six},${siy} Z`;
+    // Needle
+    const ndeg=-90+pct*180;
+    const nr=50;
+    const needleX=cx+nr*Math.cos(angle), needleY=cy+nr*Math.sin(angle);
+    html+=`<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <svg viewBox="0 0 160 100" style="width:130px;height:82px;overflow:visible">
+        <path d="${trackPath}" fill="var(--border)"/>
+        <path d="${arcPath}" fill="${color}" fill-opacity="0.85"/>
+        <line class="gauge-needle" data-rot="${ndeg}" x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy-46}" stroke="${color}" stroke-width="2.5" stroke-linecap="round" transform-origin="${cx} ${cy}" style="transform:rotate(-90deg);transition:transform 0.8s cubic-bezier(0.34,1.56,0.64,1)"/>
+        <circle cx="${cx}" cy="${cy}" r="5" fill="${color}"/>
+        <text x="${cx}" y="${cy+16}" fill="var(--text)" font-family="Space Mono" font-size="13" font-weight="700" text-anchor="middle">${v}</text>
+      </svg>
+      <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px">${labels[i]}</div>
+    </div>`;
+  });
+  return html+'</div>';
+}
+
+/* ── STACKED BAR ── */
+function renderStacked(nums, labels) {
+  // Group into pairs for stacking
+  const max=Math.max(...nums);
+  const chartH=180;
+  const pairs=[];
+  for(let i=0;i<nums.length;i+=2){
+    if(i+1<nums.length) pairs.push([nums[i],nums[i+1],[labels[i],labels[i+1]]]);
+    else pairs.push([nums[i],0,[labels[i],'']]);
+  }
+  const pairMax=Math.max(...pairs.map(p=>p[0]+p[1]));
+  let html='<div class="bar-chart">';
+  pairs.forEach(([a,b,lbls],pi)=>{
+    const ha=Math.max(4,(a/pairMax)*chartH);
+    const hb=Math.max(0,(b/pairMax)*chartH);
+    const ca=getColor(pi*2,nums.length);
+    const cb=getColor(pi*2+1,nums.length);
+    html+=`<div class="bar-wrap">
+      <div class="bar-val" style="font-size:8px">${a}${b?'+'+b:''}</div>
+      <div style="display:flex;flex-direction:column;justify-content:flex-end;width:100%;height:${chartH}px">
+        <div class="bar" data-h="${hb}" style="height:0px;background:${cb};border-radius:2px 2px 0 0;width:100%"></div>
+        <div class="bar" data-h="${ha}" style="height:0px;background:${ca};border-radius:${b?'0':'2px 2px'} 0 0;width:100%;margin-top:1px"></div>
+      </div>
+      <div class="bar-lbl">${lbls[0]}</div>
+    </div>`;
+  });
+  return html+'</div>';
+}
+
+/* ── WAVE CHART ── */
+function renderWave(nums, labels) {
+  const max=Math.max(...nums), min=Math.min(...nums);
+  const W=820, H=220, pad=44;
+  const n=nums.length;
+  const xs=nums.map((_,i)=>pad+(i/(Math.max(n-1,1)))*(W-pad*2));
+  const ys=nums.map(v=>H-pad/2-((v-min)/(max-min||1))*(H-pad));
+
+  // Build multi-layer wave
+  let svg=`<div class="line-chart-wrap" style="height:260px"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">`;
+  const numLayers=3;
+  for(let layer=numLayers;layer>=1;layer--){
+    const offset=(layer-1)*16;
+    const adjustedYs=ys.map(y=>y+offset);
+    let d=`M${xs[0]},${adjustedYs[0]}`;
+    for(let i=1;i<n;i++){
+      const cpx=(xs[i-1]+xs[i])/2;
+      d+=` C${cpx},${adjustedYs[i-1]} ${cpx},${adjustedYs[i]} ${xs[i]},${adjustedYs[i]}`;
+    }
+    const fillD=d+` L${xs[n-1]},${H} L${xs[0]},${H} Z`;
+    const color=getColor(layer-1,numLayers+2);
+    const gid='wg'+Date.now()+layer;
+    svg+=`<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${color}" stop-opacity="${0.5-layer*0.1}"/>
+      <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+    </linearGradient></defs>
+    <path d="${fillD}" fill="url(#${gid})"/>
+    <path d="${d}" fill="none" stroke="${color}" stroke-width="${4-layer*0.8}" opacity="${0.9-layer*0.2}" stroke-linecap="round"/>`;
+  }
+
+  // Grid + dots for top layer
+  for(let g=0;g<=3;g++){
+    const gy=(H-pad/2)-(g/3)*(H-pad);
+    const val=(min+(g/3)*(max-min)).toFixed(0);
+    svg+=`<line x1="${pad}" y1="${gy}" x2="${W-pad/2}" y2="${gy}" stroke="var(--border)" stroke-width="0.8"/>
+    <text x="${pad-6}" y="${gy}" fill="var(--muted)" font-size="10" font-family="Space Mono" text-anchor="end" dominant-baseline="middle">${val}</text>`;
+  }
+  xs.forEach((x,i)=>{
+    const c=getColor(i,n);
+    svg+=`<circle cx="${x}" cy="${ys[i]}" r="4.5" fill="${c}" stroke="var(--bg)" stroke-width="2"><title>${labels[i]}: ${nums[i]}</title></circle>`;
+    const step=Math.ceil(n/10);
+    if(i%step===0||i===n-1) svg+=`<text x="${x}" y="${H-4}" fill="var(--muted)" font-size="10" font-family="Space Mono" text-anchor="middle">${labels[i]}</text>`;
+  });
+  return svg+'</svg></div>';
+}
+
+function randomize() {
+  const n = Math.floor(Math.random()*8)+4;
+  const nums = Array.from({length:n},()=>Math.floor(Math.random()*90)+10);
+  document.getElementById('numInput').value = nums.join(', ');
+  document.getElementById('labelInput').value = '';
+  render();
+}
+
+function clearAll() {
+  document.getElementById('numInput').value = '';
+  document.getElementById('labelInput').value = '';
+  document.getElementById('chartZone').classList.remove('visible');
+  document.getElementById('errMsg').classList.remove('show');
+}
+
+render();
+</script>
+
+<!-- FOOTER CONTACT -->
+<div class="footer-contact">
+  <div class="footer-left">
+    <div class="footer-founded">Founded by</div>
+    <div class="footer-name">ABHI<span>SHEK</span></div>
+  </div>
+  <div class="footer-right">
+    <div class="contact-label">Contact</div>
+    <div class="contact-number">
+      <a href="tel:9693628089">9693628089</a>
+    </div>
+  </div>
+</div>
+
+<!-- FLOATING CALL BUTTON -->
+<a href="tel:9693628089" class="float-call" title="Call Abhishek">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.59a16 16 0 0 0 6 6l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+  </svg>
+</a>
+<div class="float-call-tooltip">9693628089</div>
+
+<script>
+async function downloadPDF(evt) {
+  addRipple(evt, document.getElementById('downloadBtn'));
+  const btn = document.getElementById('downloadBtn');
+  const zone = document.getElementById('chartZone');
+  if (!zone.classList.contains('visible')) { render(); }
+  btn.classList.add('loading');
+  btn.querySelector('span').textContent = 'PREPARING...';
+
+  function loadScript(src) {
+    return new Promise((res, rej) => {
+      if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
+      const s = document.createElement('script');
+      s.src = src; s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+
+  try {
+    const canvas = await html2canvas(zone, {
+      backgroundColor: '#10101a', scale: 2, useCORS: true, logging: false
+    });
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const W = canvas.width / 2, H = canvas.height / 2;
+    const pdf = new jsPDF({ orientation: W > H ? 'landscape' : 'portrait', unit: 'px', format: [W, H + 70] });
+
+    pdf.setFillColor(228, 255, 71);
+    pdf.rect(0, 0, W, 38, 'F');
+    pdf.setTextColor(7, 7, 13);
+    pdf.setFontSize(15);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('ABHISHEK -- GRAPH STUDIO', 18, 24);
+
+    pdf.addImage(imgData, 'PNG', 0, 38, W, H);
+
+    pdf.setFillColor(16, 16, 26);
+    pdf.rect(0, H + 38, W, 32, 'F');
+    pdf.setTextColor(228, 255, 71);
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Founded by Abhishek', 18, H + 57);
+    pdf.setTextColor(107, 255, 216);
+    pdf.text('9693628089', W - 18, H + 57, { align: 'right' });
+
+    pdf.save('abhishek-graph.pdf');
+  } catch (e) {
+    alert('Could not generate PDF. Please try again.');
+    console.error(e);
+  }
+
+  btn.classList.remove('loading');
+  btn.querySelector('span').textContent = 'DOWNLOAD PDF';
+}
+
+async function downloadImage(evt) {
+  addRipple(evt, document.getElementById('imgDownloadBtn'));
+  const btn = document.getElementById('imgDownloadBtn');
+  const zone = document.getElementById('chartZone');
+  if (!zone.classList.contains('visible')) { render(); }
+  btn.classList.add('loading');
+  btn.querySelector('span').textContent = 'CAPTURING...';
+
+  function loadScript(src) {
+    return new Promise((res, rej) => {
+      if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
+      const s = document.createElement('script');
+      s.src = src; s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+
+  try {
+    // Create a wrapper to capture with branding
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = `
+      background:#07070d; padding:0; display:inline-block; font-family:'Space Mono',monospace;
+      position:fixed; left:-9999px; top:0; min-width:${zone.offsetWidth}px;
+    `;
+
+    const header = document.createElement('div');
+    header.style.cssText = `background:#e4ff47; padding:10px 20px; display:flex; align-items:center; justify-content:space-between;`;
+    header.innerHTML = `
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#07070d;letter-spacing:3px;">ABHISHEK -- GRAPH STUDIO</span>
+      <span style="font-size:10px;color:#07070d;letter-spacing:2px;">Graph Studio</span>`;
+
+    const clonedZone = zone.cloneNode(true);
+    clonedZone.style.display = 'block';
+    clonedZone.style.animation = 'none';
+    clonedZone.style.borderRadius = '0';
+    clonedZone.style.border = 'none';
+
+    const footer = document.createElement('div');
+    footer.style.cssText = `background:#10101a; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; border-top:2px solid #e4ff47;`;
+    footer.innerHTML = `
+      <span style="color:#e4ff47;font-size:11px;letter-spacing:2px;">FOUNDED BY ABHISHEK</span>
+      <span style="color:#6bffd8;font-size:13px;letter-spacing:3px;font-weight:bold;">9693628089</span>`;
+
+    wrapper.appendChild(header);
+    wrapper.appendChild(clonedZone);
+    wrapper.appendChild(footer);
+    document.body.appendChild(wrapper);
+
+    const canvas = await html2canvas(wrapper, {
+      backgroundColor: '#07070d', scale: 2, useCORS: true, logging: false
+    });
+    document.body.removeChild(wrapper);
+
+    const link = document.createElement('a');
+    link.download = 'abhishek-graph.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+
+    // Flash success
+    btn.style.background = 'rgba(176,107,255,0.2)';
+    setTimeout(() => { btn.style.background = ''; }, 600);
+  } catch (e) {
+    alert('Could not capture image. Please try again.');
+    console.error(e);
+  }
+
+  btn.classList.remove('loading');
+  btn.querySelector('span').textContent = 'DOWNLOAD IMAGE';
+}
+
+function addRipple(evt, btn) {
+  if (!evt) return;
+  const r = document.createElement('span');
+  r.className = 'btn-ripple';
+  const rect = btn.getBoundingClientRect();
+  r.style.left = (evt.clientX - rect.left - 3) + 'px';
+  r.style.top  = (evt.clientY - rect.top  - 3) + 'px';
+  btn.appendChild(r);
+  setTimeout(() => r.remove(), 700);
+}
+</script>
+</body>
+</html>
